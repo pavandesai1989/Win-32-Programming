@@ -1,0 +1,87 @@
+/* Adding Menus to the Window   */
+
+#include<Windows.h>
+#include<tchar.h>
+
+//Declare the windows procedure method. Operating system talks to the window using the message system to respond to the events.
+//On event OS sends messages to the window which we can handle using the following method.
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
+
+//create handler for the menu
+HMENU hmenu;
+
+//declare function to add menus
+void AddMenus(HWND hwnd);
+
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance ,LPSTR lpcmdline, int ncmdshow)  //entry point for WIN 32 API
+{
+	//Its registered class for windows !!!
+	WNDCLASSW wc = { 0 };
+
+	//following 2 are opptional !
+	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;   //backgrd color for wnd
+	wc.hCursor = LoadCursor(NULL,IDC_ARROW);  // to show cursor in our window
+
+	//following 3 are the main attributes to be defined!!!!
+	wc.hInstance = hinstance; //pass the hinst from winmain
+	wc.lpszClassName =  L"MyWindowClass" ; //class name  for LPCWSTR
+	wc.lpfnWndProc = WindowProc;   //pointer to the function
+
+	//Register the class so that we can create a window
+	if(!RegisterClass(&wc))  return -1; //register failed!!!!!!!!!!!!!
+
+	CreateWindowW(L"MyWindowClass",L"My window Title",WS_OVERLAPPEDWINDOW | WS_VISIBLE,100,100,500,500,NULL,NULL,hinstance,NULL);
+
+	//define the message structure
+	MSG msg = {0};
+
+	while(GetMessage(&msg,NULL,NULL,NULL))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return 0;
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	switch( umsg)
+	{
+	case WM_COMMAND: //every button/window this message is passed
+		//wparam contains the id for the menu.
+
+		switch(wparam)
+		{
+		case 1:
+			MessageBeep(MB_OK);
+			break;	
+		}		 	 
+
+	case WM_CREATE:
+		 AddMenus(hwnd);
+		  break;
+
+	case WM_DESTROY: //callled when we click the cancel button
+	     PostQuitMessage(0);  //it breaks the loop by returning the  GetMessage 0.
+	     break;
+
+    default: return DefWindowProcW(hwnd,umsg,wparam,lparam);
+	}
+}
+
+void AddMenus(HWND hwnd)
+{
+	hmenu = CreateMenu();  //only creates the menu
+
+	//add emnu to file
+	HMENU hfilemenu = CreateMenu();
+
+	//append items to the menu
+	//assign task to the menu using the 3rd argument.Specify ID for the menu.
+	AppendMenu(hmenu,MF_STRING,1,L"File");
+	AppendMenu(hmenu,MF_STRING,NULL,L"Help");
+
+	//add this menu to the window
+	SetMenu(hwnd,hmenu);
+}

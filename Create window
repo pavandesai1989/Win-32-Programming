@@ -1,0 +1,84 @@
+
+---------------------- Create window , message pool , windows procedure ----------------------------------------------------------------------------
+
+/*
+ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow )
+
+hInstance is something called a "handle to an instance" or "handle to a module." 
+The operating system uses this value to identify the executable (EXE) when it is loaded in memory. 
+The instance handle is needed for certain Windows functions—for example, to load icons or bitmaps.
+
+hPrevInstance has no meaning. It was used in 16-bit Windows, but is now always zero.
+
+pCmdLine contains the command-line arguments as a Unicode string.
+
+nCmdShow is a flag that says whether the main application window will be minimized, maximized, or shown normally.
+
+*/
+
+
+#include<Windows.h>
+#include<tchar.h>
+
+//Declare the windows procedure method. Operating system talks to the window using the message system to respond to the events.
+//On event OS sends messages to the window which we can handle using the following method.
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
+
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance ,LPSTR lpcmdline, int ncmdshow)  //entry point for WIN 32 API
+{
+	//Its registered class for windows !!!
+	WNDCLASSW wc = { 0 };
+
+	//following 3 are the main attributes to be defined!!!!
+	wc.hInstance = hinstance; //pass the hinst from winmain
+	wc.lpszClassName =  L"MyWindowClass" ; //class name  for LPCWSTR
+	wc.lpfnWndProc = WindowProc;   //pointer to the function
+
+	//Register the class so that we can create a window
+	if(!RegisterClass(&wc))  return -1; //register failed!!!!!!!!!!!!!
+
+	//now create the window.
+	/* 1 -- Name of the Application , 
+	2 -- Text that appears on the title bar,
+	3 -- Type of window to create, WS_OVERLAPPEDWINDOW:
+	4,5 -- CW_USEDEFAULT, CW_USEDEFAULT: initial position (x, y)
+	6,7 -- Initial width and height of the window
+	8 -- parent of the window
+	9 -- info on is this app has menu bar,
+	10 -- instance handle
+	11 -- additional app data
+	*/
+	CreateWindowW(L"MyWindowClass",L"My window Title",WS_OVERLAPPEDWINDOW | WS_VISIBLE,100,100,500,500,NULL,NULL,hinstance,NULL);
+
+	//define the message structure
+	MSG msg = {0};
+
+	/*
+	   A GUI application must respond to events from the user and from the operating system.
+	   To solve this problem, Windows uses a message-passing model. 
+	   The operating system communicates with your application window by passing messages to it.
+	*/	
+	//Get messages from the queue.
+	while(GetMessage(&msg,NULL,NULL,NULL))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return 0;
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	switch( umsg)
+	{
+	      case WM_DESTROY: //callled when we click the cancel button
+			  PostQuitMessage(0);  //it breaks the loop by returning the  GetMessage 0.
+			  break;
+
+		  default:
+			  return DefWindowProcW(hwnd,umsg,wparam,lparam);
+	}
+}
+
+
+-----------------------------------------------------------------------------------------------------------------------------

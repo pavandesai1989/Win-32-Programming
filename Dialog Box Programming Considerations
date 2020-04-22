@@ -86,6 +86,182 @@ It does not provide the interface for modeless dialog boxes unless the applicati
 messages in its main message loop.
 
 
+----------------------------- Program dialog Boxes -----------------------------------------------------------------------
+1. Displaying Message Box::::
+   The simplest form of modal dialog box is the message box.Most applications use message boxes to warn the user of errors and to
+   prompt for directions on how to proceed after an error has occurred.
+   
+   You create a message box by using the MessageBox or MessageBoxEx function, specifying the message and the number and type of buttons
+   to display. The system creates a modal dialog box, providing its own dialog box template and procedure. After the user closes 
+   the message box, MessageBox or MessageBoxEx returns a value identifying the button chosen by the user to close the message box.
+
+MessageBox function :::::::
+Displays a modal dialog box that contains a system icon, a set of buttons, and a brief application-specific message, such as 
+status or error information. The message box returns an integer value that indicates which button the user clicked.
+
+int MessageBox(
+  HWND    hWnd,
+  LPCTSTR lpText,
+  LPCTSTR lpCaption,
+  UINT    uType
+);
+
+parameters:
+Type: HWND ----- A handle to the owner window of the message box to be created. If this parameter is NULL, the message box has no owner
+window.
+
+Type: LPCTSTR ----The message to be displayed. If the string consists of more than one line, you can separate the lines using a 
+carriage return and/or linefeed character between each line.
+
+Type: LPCTSTR ---- The dialog box title. If this parameter is NULL, the default title is Error.
+
+Type: UINT --- The contents and behavior of the dialog box. This parameter can be a combination of flags from the following groups of 
+flags.
+
+Note :
+IDCANCEL	Cancel button was selected, Alt-F4 was pressed, Escape was pressed or the user clicked on the close window button.
+IDNO	No button was selected.
+IDOK	OK button was selected.
+IDRETRY	Retry button was selected.
+IDYES	Yes button was selected.
+
+
+UTYPE --- The following system icons can be used in a message box by setting the uType parameter to the corresponding flag value.
+Icon	Flag values
+Icon for MB_ICONHAND, MB_ICONSTOP, and MB_ICONERROR	MB_ICONHAND, MB_ICONSTOP, or MB_ICONERROR
+Icon for MB_ICONQUESTION	MB_ICONQUESTION
+Icon for MB_ICONEXCLAMATION and MB_ICONWARNING	MB_ICONEXCLAMATION or MB_ICONWARNING
+Icon for MB_ICONASTERISK and MB_ICONINFORMATION	MB_ICONASTERISK or MB_ICONINFORMATION
+
+
+------------------------------------ Sample code: ---------------------------------------------------------------------------------
+
+	int msgboxID = MessageBox(
+		NULL,
+		(LPCWSTR)L"Resource not available\nDo you want to try again?",
+		(LPCWSTR)L"Account Details",
+		MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2
+		);
+
+	switch (msgboxID)
+	{
+	case IDCANCEL:
+		// TODO: add code
+		break;
+	case IDTRYAGAIN:
+		// TODO: add code
+		break;
+	case IDCONTINUE:
+		// TODO: add code
+		break;
+	} 
+  
+--------------------------------------- Creating a modal dialog box ----------------------------------------------------------
+You create a modal dialog box by using the DialogBox function.
+
+
+
+---------------------------- DIALOG resource ----------------------------------------------------------
+Defines a dialog box. The statement defines the position and dimensions of the dialog box on the screen as well as the dialog box style.
+nameID DIALOG x, y, width, height  [optional-statements] {control-statement  . . . }
+
+Example code as below:
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 66
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "My About Box"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,174,18,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,174,35,50,14
+    GROUPBOX        "About this program...",IDC_STATIC,7,7,225,52
+    CTEXT           "An example program showing how to use Dialog Boxes\r\n\r\nby theForger",
+                    IDC_STATIC,16,18,144,33
+END
+
+dialog image in the below link:
+
+http://www.winprog.org/tutorial/dialogs.html
+
+Explanation:::
+IDD_ABOUTDLG is the id of the resource.
+DIALOG is the resource type, and the four number are the Left, Top, Width and Height co-ordinates
+The second line starts with STYLE and follows with the window styles that will be used to create the dialog
+The FONT line specifies the size and name of the font you wish to use for this dialog box
+
+Here's the line for the OK button. The & in this case like with menus underlines the next letter "O", so that by pressing Alt+O 
+the user can activate this control (part of the default processing I mentioned). IDOK is the control identifier. IDOK is pre-defined 
+so we don't need to #define it ourselves. The four numbers at the end are the left, top, width and height, all in dialog units.
+
+IMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMp
+There are a few important differences between a dialog procedure and window procedure. One is that you DO NOT call DefWindowProc() for 
+message you don't handle. With dialogs this is done automatically for you (and will really screw things up if you do it).
+Secondly, in general you return FALSE for messages you don't process, and TRUE for messages you do process, UNLESS the message 
+specifies you return something else. Note that this is what we do above, the default is to do nothing and return FALSE, while messages
+we do handle break the switch() and return TRUE.
+
+Thirdy, You do not call DestroyWindow() to close a dialog, you call EndDialog(). The second paramter is the value that is returned 
+to whatever code called DialogBox().
+
+Finally, instead of handling WM_CREATE, you handle WM_INITDIALOG to do any processing that needs to be done before the dialog appears,
+and then return TRUE to have the keyboard focus set to the default control. (You can actually handle WM_CREATE as well, but it is sent
+BEFORE any of the controls have been created, so you can't access them. In WM_INITDIALOG the controls have already been created).
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                            
                            
                            

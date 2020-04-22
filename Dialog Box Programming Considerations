@@ -1,0 +1,73 @@
+/*   Programming considerations of the dialog Boxes    */
+
+1. Dialog Box Procedures : A dialog box procedure is similar to a window procedure in that the system sends messages to the procedure when   
+                           it has information to give or tasks to carry out.
+                           
+  NOTE : Unlike a window procedure, a dialog box procedure never calls the DefWindowProc function. Instead, 
+  it returns TRUE if it processes a message or FALSE if it does not.
+  
+   /*--------------------- Dialog procedure will be of the following  form: ------------------------------*/    
+    BOOL CALLBACK DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) 
+{ 
+    switch (message) 
+    { 
+ 
+        // Place message cases here. 
+ 
+        default: 
+            return FALSE; 
+    } 
+}
+
+        The procedure parameters serve the same purpose as in a window procedure, with the hwndDlg parameter receiving the window handle
+of the dialog box.
+
+Most dialog box procedures process the WM_INITDIALOG message and the WM_COMMAND messages sent by the controls, but process few if 
+any other messages.
+
+WM_INITDIALOG --- Sent to the dialog box procedure immediately before a dialog box is displayed. Dialog box procedures typically 
+use this message to initialize controls and carry out any other initialization tasks that affect the appearance of the dialog box.
+
+If a dialog box procedure does not process a message, it must return FALSE to direct the system to process the messages internally.
+
+---------------------------------- The WM_INITDIALOG Message -------------------------------
+The system does not send a WM_CREATE message to the dialog box procedure. Instead, it sends a WM_INITDIALOG message when
+it creates the dialog box and all its controls but before it displays the dialog box.
+
+The procedure should carry out any initialization required to ensure that the dialog box displays the current settings 
+associated with the task. For example, when a dialog box contains a control to show the current drive and directory, 
+the procedure must determine the current drive and directory and set the control to that value.
+
+The procedure can initialize controls by using functions such as SetDlgItemText and CheckDlgButton. Because controls are windows, 
+the procedure can also manipulate them by using window-management functions such as EnableWindow and SetFocus.
+The procedure can retrieve the window handle to a control by using the GetDlgItem function.
+
+EnableWindow  --- Enables or disables mouse and keyboard input to the specified window or control. When input is disabled,
+the window does not receive input such as mouse clicks and key presses. When input is enabled, the window receives all input.
+BOOL EnableWindow(
+  HWND hWnd,
+  BOOL bEnable
+);
+
+SetFocus --- Sets the keyboard focus to the specified window.
+HWND SetFocus(
+  HWND hWnd
+);
+
+Retrieves a handle to a control in the specified dialog box. -- 
+HWND GetDlgItem(
+  HWND hDlg,
+  int  nIDDlgItem
+);
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+   
+   
+

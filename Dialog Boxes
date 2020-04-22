@@ -1,0 +1,155 @@
+/*    Dialog Boxes   .For deatils refer chapter 11 petzold book */
+
+A dialog box is a temporary window an application creates to retrieve user input.An application typically uses dialog boxes to prompt the 
+user for additional information for menu items.
+
+A dialog box usually contains one or more controls (child windows) with which the user enters text, chooses options, or directs the action.
+
+Windows also provides predefined dialog boxes that support common menu items such as Open and Print. Applications that use these menu items should use the common dialog boxes 
+to prompt for this user input, regardless of the type of application.
+
+Many of the messages that are processed by that dialog box window procedure located within
+Windows are also passed to a function within your own program, called a "dialog box procedure" or
+"dialog procedure."
+
+The dialog procedure is similar to a normal window procedure, but with some
+important differences. Generally, you will not be doing much within the dialog procedure beyond
+initializing the child window controls when the dialog box is created, processing messages from the
+child window controls, and ending the dialog box. Dialog procedures generally do not process
+WM_PAINT messages, nor do they directly process keyboard and mouse input.
+
+------------------------------  About Dialog Boxes---------------------------------------------------------------------------
+When to Use a Dialog Box???????????????????????
+    Most applications use dialog boxes to prompt for additional information for menu items that require user input. Using a dialog box is 
+the only recommended way for an application to retrieve the input. For example, a typical Open menu item requires the name of a file
+to open, so an application should use a dialog box to prompt the user for the name. In such cases, the application creates the dialog 
+box when the user clicks the menu item and destroys the dialog box immediately after the user supplies the information.
+
+To support the different ways applications use dialog boxes, there are two types of dialog box: modal and modeless.
+
+A modal dialog box requires the user to supply information or cancel the dialog box before allowing the application to continue. 
+Applications use modal dialog boxes in conjunction with menu items that require additional information before they can proceed.
+
+A modeless dialog box allows the user to supply information and return to the previous task without closing the dialog box.
+
+Modal dialog boxes are simpler to manage than modeless dialog boxes because they are created, 
+perform their task, and are destroyed by calling a single function.
+
+To create either a modal or modeless dialog box, an application must supply a dialog box template to describe the dialog box style 
+and content.the application must also supply a dialog box procedure to carry out tasks.
+The dialog box template is a binary description of the dialog box and the controls it contains.
+
+The developer can create dialog box template as a resource to be loaded from the application's executable file, or created in memory 
+while the application runs.
+
+The dialog box procedure is an application-defined callback function that the system calls when it has input for the dialog 
+box or tasks for the dialog box to carry out.Although a dialog box procedure is similar to a window procedure, it does not have 
+the same responsibilities.
+
+--------------- How to create Dialog Box?????????????????? -------------------------------------
+An application typically creates a dialog box by using either the DialogBox or CreateDialog function.
+DialogBox creates a modal dialog box; 
+CreateDialog creates a modeless dialog box.
+
+These two functions load a dialog box template from the application's executable file and create a pop-up window that 
+matches the template's specifications. 
+There are other functions that create a dialog box by using templates in memory;
+they pass additional information to the dialog box procedure as the dialog box is created.
+
+Dialog boxes usually belong to a predefined, exclusive window class. The system uses this window class and its corresponding
+window procedure for both modal and modeless dialog boxes.
+
+When the function is called, it creates the window for the dialog box, as well as the windows for the controls in the 
+dialog box, then sends selected messages to the dialog box procedure.
+
+While the dialog box is visible, the predefined window procedure manages all messages, processing some messages and passing 
+others to the dialog box procedure so that the procedure can carry out tasks. Applications do not have direct access to the 
+predefined window class or window procedure, but they can use the dialog box template and dialog box procedure to modify the style 
+and behavior of a dialog box.
+
+----------------------------------- Dialog Box Owner Window --------------------------------------------------------------------------
+Most dialog boxes have an owner window (or more simply, an owner). When creating the dialog box, the application sets the owner
+by specifying the owner's window handle.
+The system uses the owner to determine the position of the dialog box in the Z order so that the dialog box is always
+positioned above its owner. Also, the system can send messages to the window procedure of the owner, notifying it of events 
+in the dialog box.
+
+The system automatically hides or destroys the dialog box whenever its owner is hidden or destroyed.
+This means the dialog box procedure requires no special processing to detect changes to the state of the owner window.
+
+Because the typical dialog box is used in conjunction with a menu item, the owner window is usually the window containing the menu.
+Although it is possible to create a dialog box that has no owner, it is not recommended.
+
+-------------------------------- Message Boxes ----------------------------------------------------------------------------------------
+A message box is a special dialog box that an application can use to display messages and prompt for simple input.
+A message box typically contains a text message and one or more buttons.
+
+An application creates the message box by using the MessageBox or MessageBoxEx function, specifying the text and the number and 
+types of buttons to display.Note that currently there is no difference between how MessageBox and MessageBoxEx work.
+
+Although the message box is a dialog box, the system takes complete control of the creation and management of the message box.
+This means the application does not provide a dialog box template and dialog box procedure.
+The system creates its own template based on the text and buttons specified for the message box and supplies its own dialog box procedure.
+
+If the application specifies an owner window when calling MessageBox or MessageBoxEx, the system disables the owner.
+
+NOTE : An application can also direct the system to disable all top-level windows belonging to the current thread
+by specifying the MB_TASKMODAL value when creating the dialog box.
+
+The system can send messages to the owner, such as WM_CANCELMODE and WM_ENABLE, just as it does when creating a modal dialog box. 
+The owner window should carry out any actions requested by these messages.
+
+-------------------------------------- Modal Dialog Boxes -------------------------------------------------------------------------
+A modal dialog box should be a pop-up window having a window menu, a title bar, and a thick border.
+that is, the dialog box template should specify the WS_POPUP, WS_SYSMENU, WS_CAPTION, and DS_MODALFRAME styles.
+
+Although an application can designate the WS_VISIBLE style, the system always displays a modal dialog box regardless of whether 
+the dialog box template specifies the WS_VISIBLE style.
+An application must not create a modal dialog box having the WS_CHILD style.A modal dialog box with this style disables itself,
+preventing any subsequent input from reaching the application.
+
+Creation of modal dialog!!!!!!!!!!!!
+ An application creates a modal dialog box by using either the DialogBox or DialogBoxIndirect function.
+ DialogBox requires the name or identifier of a resource containing a dialog box template; 
+ DialogBoxIndirect requires a handle to a memory object containing a dialog box template.
+ 
+ The DialogBoxParam and DialogBoxIndirectParam functions also create modal dialog boxes; they are identical to the previously 
+ mentioned functions but pass a specified parameter to the dialog box procedure when the dialog box is created.
+
+When creating the modal dialog box, the system makes it the active window. The dialog box remains active until the 
+dialog box procedure calls the EndDialog function or the system activates a window in another application. Neither 
+the user nor the application can make the owner window active until the modal dialog box is destroyed.
+
+When the owner window is not already disabled, the system automatically disables the window and any child windows 
+belonging to it when it creates the modal dialog box.The owner window remains disabled until the dialog box is destroyed.
+
+When the dialog box procedure is destroyed, the system enables the owner window again, but only if the modal dialog box 
+caused the owner to be disabled.
+
+As the system creates the modal dialog box, it sends the WM_CANCELMODE message to the window (if any) currently capturing mouse 
+input. An application that receives this message should release the mouse capture so that the user can move the mouse in the modal
+dialog box. Because the system disables the owner window, all mouse input is lost if the owner fails to release the mouse upon
+receiving this message.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+

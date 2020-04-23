@@ -160,6 +160,79 @@ Icon for MB_ICONASTERISK and MB_ICONINFORMATION	MB_ICONASTERISK or MB_ICONINFORM
 You create a modal dialog box by using the DialogBox function.
 
 
+----------------------------- Resources ------------------------------------------------------------------------------------------
+
+Resources are pre-defined bits of data stored in binary format inside your executable file.
+You create resources in a resources script, a file with an extension of ".rc".
+
+The resource editor included with MSVC++ makes it very difficult to edit the resources manually, since it enforces a proprietary 
+format on them, and will totally mangle the file if you save one that you had created by hand. In general you shouldn't bother with 
+creating .rc files from scratch, but knowing how to modify them manually can be very useful.
+Another annoyance is that MSVC++ will by default name the resource header file "resource.h" even if you wanted to call
+it something else. I will go with this for the sake of simplicity in this document, but will show you how to change this 
+in the appendix on compilers.
+
+
+-------------------------------------- Responsing to the Mouse click events --------------------------------------------------
+	int iposx,iposy;
+
+	switch( umsg)
+	{ 
+		/* Mouse click Events  */
+	case WM_LBUTTONDOWN:  //Left button down //Posted when the user presses the left mouse button while the cursor is in the client area of a window
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case WM_LBUTTONUP:  //Left button Up //Posted when the user releases the left mouse button while the cursor is in the client area of a window
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}		
+
+	case WM_RBUTTONDOWN:   //Right button down:  //Left button down    WM_RBUTTONUP    release R button
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case  WM_MBUTTONDOWN:   //Middle button down  //WM_MBUTTONUP   middle button release
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+		
+		Info of x and y coord values will be in the lparam . You can take these using the LOWORD and HIWORD macros.
+		
+ LOWORD --- 
+ 
+ =-----------------------------------Double Clicks ------------------------------------------------------------------------------
+ A window does not receive double-click notifications by default. To receive double clicks, set the CS_DBLCLKS flag in the
+ WNDCLASS structure when you register the window class.
+ 
+ 	//register for the double clicks.If you set the CS_DBLCLKS flag as shown, the window will 
+	//receive double-click notifications. A double click is indicated by a window message with "DBLCLK" in the name
+	wc.style = CS_DBLCLKS;
+	
+		case WM_LBUTTONDBLCLK: //Posted when the user double-clicks the left mouse button while the cursor is in the client area of a window.
+		//Only windows that have the CS_DBLCLKS style can receive WM_LBUTTONDBLCLK messages, which the system generates 
+		//whenever the user presses, releases, and again presses the left mouse button within the system's double-click time limit
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+ 
+
+
+
+
+
 
 ---------------------------- DIALOG resource ----------------------------------------------------------
 Defines a dialog box. The statement defines the position and dimensions of the dialog box on the screen as well as the dialog box style.
@@ -205,6 +278,11 @@ to whatever code called DialogBox().
 Finally, instead of handling WM_CREATE, you handle WM_INITDIALOG to do any processing that needs to be done before the dialog appears,
 and then return TRUE to have the keyboard focus set to the default control. (You can actually handle WM_CREATE as well, but it is sent
 BEFORE any of the controls have been created, so you can't access them. In WM_INITDIALOG the controls have already been created).
+
+----------------------------- Creating a modal dialog ------------------------------------------------------------------------------
+You create a modal dialog box by using the DialogBox function.
+You must specify the identifier or name of a dialog box template resource and a pointer to the dialog box procedure.
+The DialogBox function loads the template, displays the dialog box, and processes all user input until the user closes the dialog box.
 
 
 

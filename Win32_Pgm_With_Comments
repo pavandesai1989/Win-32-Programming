@@ -1,0 +1,166 @@
+/*   create window with adding menus   */
+
+#include<Windows.h>
+#include<tchar.h>
+
+#define param_new 1
+#define param_exit 2
+
+//Declare the windows procedure method. Operating system talks to the window using the message system to respond to the events.
+//On event OS sends messages to the window which we can handle using the following method.
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam);
+//create handler for the menu
+HMENU hmenu;
+//declare function to add menus
+void AddMenus(HWND hwnd);
+
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance ,LPSTR lpcmdline, int ncmdshow)  //entry point for WIN 32 API
+{
+	//Its registered class for windows !!!  
+	WNDCLASSW wc = { 0 };
+
+	//following 2 are opptional !
+	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;   //backgrd color for wnd
+	wc.hCursor = LoadCursor(NULL,IDC_ARROW);  // to show cursor in our window
+
+	//following 3 are the main attributes to be defined!!!!
+	wc.hInstance = hinstance; //pass the hinst from winmain
+	wc.lpszClassName =  L"MyWindowClass" ; //class name  for LPCWSTR
+	wc.lpfnWndProc = WindowProc;   //pointer to the function
+
+	//register for the double clicks.If you set the CS_DBLCLKS flag as shown, the window will 
+	//receive double-click notifications. A double click is indicated by a window message with "DBLCLK" in the name
+	wc.style = CS_DBLCLKS;
+	 
+	//Register the class so that we can create a window
+	if(!RegisterClass(&wc))  return -1; //register failed!!!!!!!!!!!!!
+
+	CreateWindowW(L"MyWindowClass",L"My window Title",WS_OVERLAPPEDWINDOW | WS_VISIBLE,100,100,500,500,NULL,NULL,hinstance,NULL);
+
+	//define the message structure
+	MSG msg = {0};
+
+	while(GetMessage(&msg,NULL,NULL,NULL))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return 0;
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	int iposx,iposy;
+
+	/*
+	HIWORD --- Retrieves the high-order word from the specified 32-bit value 
+	HIWORD(DWORD dwValue );    dwValue The value to be converted
+    
+	LOWORD --- Retrieves the low-order word from the specified value.
+	WORD LOWORD( DWORD dwValue);   dwValue The value to be converted.
+	*/
+
+	switch( umsg)
+	{ 
+		/* Mouse click Events  */
+	case WM_LBUTTONDOWN:  //Left button down //Posted when the user presses the left mouse button while the cursor is in the client area of a window
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case WM_LBUTTONUP:  //Left button Up //Posted when the user releases the left mouse button while the cursor is in the client area of a window
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}		
+
+	case WM_RBUTTONDOWN:   //Right button down:  //Left button down    WM_RBUTTONUP    release R button
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case  WM_MBUTTONDOWN:   //Middle button down  //WM_MBUTTONUP   middle button release
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case WM_LBUTTONDBLCLK: //Posted when the user double-clicks the left mouse button while the cursor is in the client area of a window.
+		//Only windows that have the CS_DBLCLKS style can receive WM_LBUTTONDBLCLK messages, which the system generates 
+		//whenever the user presses, releases, and again presses the left mouse button within the system's double-click time limit
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+
+	case WM_NCLBUTTONDOWN: //msg sent when user click left mouse button in the non client area
+		//Posted when the user presses the left mouse button while the cursor is within the nonclient area of a window
+		{
+			iposx = LOWORD(lparam); //extract x coord which is in lparam
+			iposy = HIWORD(lparam);
+			break;
+		}
+			
+	case WM_COMMAND: //every button/window this message is passed
+		{
+			//wparam contains the id for the menu.
+			int wmId = LOWORD(wparam);  //command ID .TO check what type of command was sent
+			int wmEvent = HIWORD(wparam);
+
+			switch(wparam)
+			{
+			case param_new:   //beep on select new from menu
+				MessageBeep(MB_OK);
+				break;
+
+			case param_exit:  //on select exit destroy window 
+				PostQuitMessage(0);
+				break;
+			}	
+		}
+	case WM_CREATE:
+		 AddMenus(hwnd);
+		  break;
+
+	case WM_DESTROY: //callled when we click the cancel button
+	     PostQuitMessage(0);  //it breaks the loop by returning the  GetMessage 0.
+	     break;
+
+    default: return DefWindowProcW(hwnd,umsg,wparam,lparam);
+	}
+}
+
+void AddMenus(HWND hwnd)
+{
+	hmenu = CreateMenu();  //only creates the menu
+
+	//add drop down menu to file
+	//use MF_POPUP to add the drop down menu. Third arg is useless.
+	HMENU hfilemenu = CreateMenu();
+
+	AppendMenu(hfilemenu,MF_STRING,param_new,L"new");
+	AppendMenu(hfilemenu,MF_STRING,NULL,L"open");
+
+	//adding separator
+	AppendMenu(hfilemenu,MF_SEPARATOR,NULL,NULL);
+	AppendMenu(hfilemenu,MF_STRING,param_exit,L"exit"); 
+
+	//append items to the menu
+	//assign task to the menu using the 3rd argument.Specify ID for the menu.
+	//assign task to the menu using the 3rd argument.Specify ID for the menu.
+	AppendMenu(hmenu,MF_POPUP,(UINT_PTR)hfilemenu,L"File");
+	AppendMenu(hmenu,MF_STRING,NULL,L"Help");
+
+	//add this menu to the window
+	SetMenu(hwnd,hmenu);
+}
+
+  
